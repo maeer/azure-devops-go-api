@@ -67,10 +67,18 @@ type ContainerResourceParameters struct {
 	Version *string `json:"version,omitempty"`
 }
 
+type CreatePipelineRepositoryParameters struct {
+	Id   *string `json:"id,omitempty"`
+	Type *string `json:"type,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
 // Configuration parameters of the pipeline.
 type CreatePipelineConfigurationParameters struct {
 	// Type of configuration.
-	Type *ConfigurationType `json:"type,omitempty"`
+	Type       *ConfigurationType                  `json:"type,omitempty"`
+	Repository *CreatePipelineRepositoryParameters `json:"repository,omitempty"`
+	Path       *string                             `json:"path,omitempty"`
 }
 
 // Parameters to create a pipeline.
