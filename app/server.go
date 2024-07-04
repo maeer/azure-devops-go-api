@@ -29,9 +29,9 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Printf("Received data length: %d\n", length)
-	if strings.Contains(string(receiveData), "abcdefg") {
-		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-	} else {
+	if strings.Contains(string(receiveData), "GET / HTTP/1.1") {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	} else {
+		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
 }
