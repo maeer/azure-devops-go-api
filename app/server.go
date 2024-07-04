@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -21,5 +22,16 @@ func main() {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	receiveData := make([]byte, 1024)
+	length, err := conn.Read(receiveData)
+	if err != nil {
+		fmt.Println("Error reading: ", err.Error())
+		os.Exit(1)
+	}
+	fmt.Printf("Received data length: %d\n", length)
+	if strings.Contains(string(receiveData), "abcdefg") {
+		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	} else {
+		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	}
 }
