@@ -58,6 +58,7 @@ func serve(conn net.Conn) {
 		} else {
 			var buf bytes.Buffer
 			gzipWrite := gzip.NewWriter(&buf)
+			defer gzipWrite.Close()
 			_, _ = gzipWrite.Write([]byte(message))
 			gzipMessage := buf.String()
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: %d\r\n\r\n%s", len(gzipMessage), gzipMessage)))
