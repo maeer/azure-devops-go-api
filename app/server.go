@@ -24,13 +24,18 @@ func main() {
 	}
 	receiveData := make([]byte, 1024)
 	length, err := conn.Read(receiveData)
+	request := string(receiveData[:length])
+	fmt.Println(request)
 	if err != nil {
 		fmt.Println("Error reading: ", err.Error())
 		os.Exit(1)
 	}
-	fmt.Printf("Received data length: %d\n", length)
-	if strings.Contains(string(receiveData), "GET / HTTP/1.1") {
+	path := strings.Split(request, " ")[1]
+	if path == "/" {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	} else if strings.Split(path, "/")[1] == "echo" {
+		message := strings.Split(path, "/")[2]
+		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 	} else {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
