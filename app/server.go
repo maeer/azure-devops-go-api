@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"net"
 	"os"
@@ -50,7 +52,16 @@ func serve(conn net.Conn) {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	} else if segments := strings.Split(path, "/"); segments[1] == "echo" {
 		message := segments[2]
-		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
+		encodeType, ok := headers["Accept-Encoding"]
+		if !ok || encodeType != "gzip" {
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
+		} else {
+			var buf bytes.Buffer
+			gzipWrite := gzip.NewWriter(&buf)
+			_, _ = gzipWrite.Write([]byte(message))
+			gzipMessage := buf.String()
+			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: %d\r\n\r\n%s", len(gzipMessage), gzipMessage)))
+		}
 	} else if segments[1] == "user-agent" {
 		message := headers["User-Agent"]
 		conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
