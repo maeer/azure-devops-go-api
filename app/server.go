@@ -53,7 +53,7 @@ func serve(conn net.Conn) {
 	} else if segments := strings.Split(path, "/"); segments[1] == "echo" {
 		message := segments[2]
 		encodeTypes, ok := headers["Accept-Encoding"]
-		if !ok || !contains(strings.Split(encodeTypes, ","), "gzip") {
+		if !ok || !contains(strings.Split(encodeTypes, ", "), "gzip") {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 		} else {
 			var buf bytes.Buffer
