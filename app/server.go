@@ -36,8 +36,10 @@ func serve(conn net.Conn) {
 	requestSegments := strings.Split(request, "\r\n")
 	path := strings.Split(request, " ")[1]
 	headers := map[string]string{}
+	body := ""
 	for i := 1; i < len(requestSegments); i++ {
 		if requestSegments[i] == "" {
+			body = requestSegments[i+1]
 			break
 		}
 		header := strings.Split(requestSegments[i], ": ")
@@ -56,11 +58,16 @@ func serve(conn net.Conn) {
 		args := os.Args
 		dir := args[2]
 		fileName := segments[2]
-		data, err := os.ReadFile(dir + fileName)
-		if err != nil {
-			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-		} else {
-			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(data), data)))
+		if action := strings.Split(requestSegments[0], " ")[0]; action == "GET" {
+			data, err := os.ReadFile(dir + fileName)
+			if err != nil {
+				conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+			} else {
+				conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(data), data)))
+			}
+		} else if action == "POST" {
+			_ = os.WriteFile(dir+fileName, []byte(body), 0644)
+			conn.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
 		}
 	} else {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
