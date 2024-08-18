@@ -52,8 +52,8 @@ func serve(conn net.Conn) {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	} else if segments := strings.Split(path, "/"); segments[1] == "echo" {
 		message := segments[2]
-		encodeType, ok := headers["Accept-Encoding"]
-		if !ok || encodeType != "gzip" {
+		encodeTypes, ok := headers["Accept-Encoding"]
+		if !ok || !contains(strings.Split(encodeTypes, ","), "gzip") {
 			conn.Write([]byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)))
 		} else {
 			var buf bytes.Buffer
@@ -83,4 +83,13 @@ func serve(conn net.Conn) {
 	} else {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
+}
+
+func contains(arr []string, str string) bool {
+	for _, s := range arr {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }
